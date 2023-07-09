@@ -1,12 +1,17 @@
 # Django Rest Framework (DRF) Course - Module 8
+
 This is my DRF course. I hope you like it.
 
 > These notes follow on from steps/module_7.md
-***
-***
+
+---
+
+---
 
 ## Current root directory
+
 Your root directory should look like the following.
+
 ```
 drf_course\  <--This is the root directory
     backend\
@@ -43,7 +48,7 @@ drf_course\  <--This is the root directory
             >views.py
         utils\
             >__init__.py
-            >model_abstracts.py 
+            >model_abstracts.py
         >db.sqlite3
         >manage.py
         >requirements.txt
@@ -60,23 +65,24 @@ drf_course\  <--This is the root directory
     >README.md
     >server.py
 ```
+
 If in doubt, run the following git commands:
+
 ```
 git checkout module_8
 git pull origin module_8
 ```
 
-
 ## Steps/Commands
 
->Note: Please 'cd' into the root directory and fire up your virtual environment!
+> Note: Please 'cd' into the root directory and fire up your virtual environment!
 
 In the last 2 module, we built an 'item' and 'order' end point for users to purchase items. It seems to work okay but let's double down on testing.
 In this module, we will write some unit tests to test our new endpoints.
 
 DRF comes with a built in APIClient.
 
-1) Unit tests - Copy the following code into /ecommerce/tests.py
+1. Unit tests - Copy the following code into /ecommerce/tests.py
 
 ```
 from django.contrib.auth.models import User
@@ -100,17 +106,17 @@ class EcommerceTestCase(APITestCase):
         Item.objects.create(title= "Demo item 5",description= "This is a description for demo 5",price= 500,stock= 30)
         self.items = Item.objects.all()
         self.user = User.objects.create_user(
-            username='testuser1', 
+            username='testuser1',
             password='this_is_a_test',
             email='testuser1@test.com'
         )
         Order.objects.create(item = Item.objects.first(), user = User.objects.first(), quantity=1)
         Order.objects.create(item = Item.objects.first(), user = User.objects.first(), quantity=2)
-        
+
         #The app uses token authentication
         self.token = Token.objects.get(user = self.user)
         self.client = APIClient()
-        
+
         #We pass the token in all calls to the API
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
@@ -154,7 +160,7 @@ class EcommerceTestCase(APITestCase):
         for i in self.items:
             current_stock = i.stock
             self.assertTrue(i.check_stock(current_stock - 1), True)
-    
+
     def test_create_order_with_more_than_stock(self):
         '''
         test OrdersViewSet create method when order.quantity > item.stock
@@ -191,7 +197,7 @@ class EcommerceTestCase(APITestCase):
         self.assertEqual(Order.objects.count(), 2)
         response = self.client.get('/order/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
 
     def test_get_one_order(self):
         '''
@@ -203,12 +209,14 @@ class EcommerceTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 ```
 
-2) Run tests - You can run our new tests with the following command.
+2. Run tests - You can run our new tests with the following command.
+
 ```
 python manage.py test
 ```
 
 With any luck, you should see the following in your terminal.
+
 ```
 Found 18 test(s).
 Creating test database for alias 'default'...
@@ -223,46 +231,43 @@ Destroying test database for alias 'default'...
 
 Let's make some calls to our new endpoint.
 
-3) Call our endpoints - Here are the requests we can make to our new endpoints.
+3. Call our endpoints - Here are the requests we can make to our new endpoints.
 
-> This retrieves the auth token for **your_username**
+> This retrieves the auth token for ahsan
 
-curl -X POST -F 'username=**your_username**' -F 'password=**your_password**' http://api:8000/api-token-auth/
+curl -X POST -F 'username=ahsan' -F 'password=hello@123' http://api:8000/api-token-auth/
 
-http post http://api:8000/api-token-auth/ username=**your_username** password=**your_password**
-
+http post http://api:8000/api-token-auth/ username=ahsan password=hello@123
 
 > This will retrieve all items
 
-curl -X GET -H 'Authorization: Token **your_token**' http://api:8000/item/
+curl -X GET -H 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2' http://api:8000/item/
 
-http http://api:8000/item/ 'Authorization: Token **your_token**'
-
+http http://api:8000/item/ 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2'
 
 > This will retreive a single item
 
-curl -X GET -H 'Authorization: Token **your_token**' http://api:8000/item/**your_item_uuid**/
+curl -X GET -H 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2' http://api:8000/item/098fee26-3ec7-4e75-b28b-61462aec64bb/
 
-http http://api:8000/item/**your_item_uuid**/ 'Authorization: Token **your_token**' 
+http http://api:8000/item/098fee26-3ec7-4e75-b28b-61462aec64bb/ 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2'
 
 > This retrieve all orders
 
-curl -X GET -H 'Authorization: Token **your_token**' http://api:8000/order/
+curl -X GET -H 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2' http://api:8000/order/
 
-http http://api:8000/order/ 'Authorization: Token **your_token**'
+http http://api:8000/order/ 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2'
 
 > This will place an order for item id = **your_item_uuid** quantity = 1
 
-curl -X POST -H 'Content-Type: application/json' -H 'Authorization: Token **your_token**' -d '{"item": "**your_item_uuid**", "quantity": "1"}' http://api:8000/order/
+curl -X POST -H 'Content-Type: application/json' -H 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2' -d '{"item": "098fee26-3ec7-4e75-b28b-61462aec64bb", "quantity": "1"}' http://api:8000/order/
 
-http http://api:8000/order/ 'Authorization: Token **your_token**' item="**your_item_uuid**" quantity="1"
-
+http http://api:8000/order/ 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2' item="098fee26-3ec7-4e75-b28b-61462aec64bb" quantity="1"
 
 > This get order id = **your_order_uuid**
 
-curl -X GET -H 'Authorization: Token **your_token**' http://api:8000/order/**your_order_uuid**/
+curl -X GET -H 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2' http://api:8000/order/**your_order_uuid**/
 
-http http://api:8000/order/**your_order_uuid**/ 'Authorization: Token **your_token**'
+http http://api:8000/order/0b9d6a99-bc47-411b-bb33-4425b0266836/ 'Authorization: Token cea7b370d0e9bb0afc7538b6854523b83c1d9ab2'
 
 > This will create a contact request
 
@@ -272,11 +277,14 @@ http http://api:8000/contact/ name="Bobby Stearman" message="test" email="bobby@
 
 Congratulations!! You have a fully functioning and tested API!!
 
-***
-***
+---
+
+---
 
 ## Root directory
->Note: If all went well, your root directory should now look like this
+
+> Note: If all went well, your root directory should now look like this
+
 ```
 drf_course\  <--This is the root directory
     backend\
@@ -313,7 +321,7 @@ drf_course\  <--This is the root directory
             >views.py
         utils\
             >__init__.py
-            >model_abstracts.py 
+            >model_abstracts.py
         >db.sqlite3
         >manage.py
         >requirements.txt
@@ -331,5 +339,6 @@ drf_course\  <--This is the root directory
     >server.py
 ```
 
-***
-***
+---
+
+---
